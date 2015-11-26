@@ -36,6 +36,6 @@ To start the application's web and worker processes you can use foreman:
 
     foreman start
 
-Then to trigger a rebuild you can manually hit the `/event_handler` endpoint:
+Then to trigger a rebuild you can manually make a `POST` request to `/`.
 
     curl -i -X POST http://localhost:5000/
