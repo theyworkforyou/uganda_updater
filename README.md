@@ -1,6 +1,6 @@
 # kuvukazim_updater
 
-An webhook handler for updating the [`DATASOURCE`](https://github.com/mysociety/kuvakazim/blob/master/DATASOURCE) file in the KuvakaZim Jekyll site.
+A webhook handler for updating the [`DATASOURCE`](https://github.com/mysociety/kuvakazim/blob/master/DATASOURCE) file in the KuvakaZim Jekyll site.
 
 ## Install
 
