@@ -24,7 +24,7 @@ class KuvakazimUpdater
       'ASSEMBLY_DATASOURCE',
       'Update ASSEMBLY_DATASOURCE',
       assembly_datasource[:sha],
-      datasource_url(assembly_sha),
+      datasource_url(assembly),
       branch: 'master'
     )
     github.update_contents(
@@ -32,7 +32,7 @@ class KuvakazimUpdater
       'SENATE_DATASOURCE',
       'Update SENATE_DATASOURCE',
       senate_datasource[:sha],
-      datasource_url(senate_sha),
+      datasource_url(senate),
       branch: 'master'
     )
   end
@@ -43,19 +43,17 @@ class KuvakazimUpdater
     @github ||= Octokit::Client.new(access_token: GITHUB_ACCESS_TOKEN)
   end
 
-  def datasource_url(sha)
-    "https://cdn.rawgit.com/everypolitician/everypolitician-data/#{sha}/" \
-      "data/Zimbabwe/Assembly/ep-popolo-v1.0.json\n"
+  def datasource_url(house)
+    "https://cdn.rawgit.com/everypolitician/everypolitician-data/#{house[:sha]}/" \
+      "#{house[:popolo]}\n"
   end
 
-  def assembly_sha
-    assembly = zimbabwe[:legislatures].find { |l| l[:slug] == 'Assembly' }
-    assembly[:sha]
+  def assembly
+    @assembly ||= zimbabwe[:legislatures].find { |l| l[:slug] == 'Assembly' }
   end
 
-  def senate_sha
-    senate = zimbabwe[:legislatures].find { |l| l[:slug] == 'Senate' }
-    senate[:sha]
+  def senate
+    @senate ||= zimbabwe[:legislatures].find { |l| l[:slug] == 'Senate' }
   end
 
   def zimbabwe
