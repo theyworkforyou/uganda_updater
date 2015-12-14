@@ -17,17 +17,21 @@ class KuvakazimUpdater
   end
 
   def perform
-    github.create_contents(
+    assembly_datasource = github.contents('mysociety/kuvakazim', path: 'ASSEMBLY_DATASOURCE')
+    senate_datasource = github.contents('mysociety/kuvakazim', path: 'SENATE_DATASOURCE')
+    github.update_contents(
       'mysociety/kuvakazim',
       'ASSEMBLY_DATASOURCE',
       'Update ASSEMBLY_DATASOURCE',
+      assembly_datasource[:sha],
       datasource_url(assembly_sha),
       branch: 'master'
     )
-    github.create_contents(
+    github.update_contents(
       'mysociety/kuvakazim',
       'SENATE_DATASOURCE',
       'Update SENATE_DATASOURCE',
+      senate_datasource[:sha],
       datasource_url(senate_sha),
       branch: 'master'
     )
