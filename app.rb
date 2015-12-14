@@ -19,9 +19,16 @@ class KuvakazimUpdater
   def perform
     github.create_contents(
       'mysociety/kuvakazim',
-      'DATASOURCE',
-      'Update DATASOURCE',
-      datasource_url,
+      'ASSEMBLY_DATASOURCE',
+      'Update ASSEMBLY_DATASOURCE',
+      datasource_url(assembly_sha),
+      branch: 'master'
+    )
+    github.create_contents(
+      'mysociety/kuvakazim',
+      'SENATE_DATASOURCE',
+      'Update SENATE_DATASOURCE',
+      datasource_url(senate_sha),
       branch: 'master'
     )
   end
@@ -32,17 +39,27 @@ class KuvakazimUpdater
     @github ||= Octokit::Client.new(access_token: GITHUB_ACCESS_TOKEN)
   end
 
-  def datasource_url
+  def datasource_url(sha)
     "https://cdn.rawgit.com/everypolitician/everypolitician-data/#{sha}/" \
       "data/Zimbabwe/Assembly/ep-popolo-v1.0.json\n"
   end
 
-  def sha
-    countries = JSON.parse(open(countries_url).read, symbolize_names: true)
-    zimbabwe = countries.find { |c| c[:slug] == 'Zimbabwe' }
-    # FIXME: This only handles the Assembly at the moment.
+  def assembly_sha
     assembly = zimbabwe[:legislatures].find { |l| l[:slug] == 'Assembly' }
     assembly[:sha]
+  end
+
+  def senate_sha
+    senate = zimbabwe[:legislatures].find { |l| l[:slug] == 'Senate' }
+    senate[:sha]
+  end
+
+  def zimbabwe
+    @zimbabwe ||= countries.find { |c| c[:slug] == 'Zimbabwe' }
+  end
+
+  def countries
+    @countries ||= JSON.parse(open(countries_url).read, symbolize_names: true)
   end
 
   def countries_url
