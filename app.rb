@@ -1,5 +1,6 @@
 require 'json'
 require 'open-uri'
+require 'base64'
 
 require 'webhook_handler'
 require 'octokit'
@@ -17,35 +18,58 @@ class KuvakazimUpdater
   end
 
   def perform
-    assembly_datasource = github.contents('mysociety/kuvakazim', path: 'ASSEMBLY_DATASOURCE')
-    senate_datasource = github.contents('mysociety/kuvakazim', path: 'SENATE_DATASOURCE')
+    datasources = github.contents(repo, path: filename)
+    if Base64.decode64(datasources[:content]) == contents
+      warn "No changes to #{filename} detected"
+      return
+    end
     github.update_contents(
-      'mysociety/kuvakazim',
-      'ASSEMBLY_DATASOURCE',
-      'Update ASSEMBLY_DATASOURCE',
-      assembly_datasource[:sha],
-      datasource_url(assembly),
+      repo,
+      filename,
+      "Update #{filename}",
+      datasources[:sha],
+      contents,
       branch: 'master'
     )
-    github.update_contents(
-      'mysociety/kuvakazim',
-      'SENATE_DATASOURCE',
-      'Update SENATE_DATASOURCE',
-      senate_datasource[:sha],
-      datasource_url(senate),
+  rescue Octokit::NotFound => e
+    warn "Couldn't find #{filename}: #{e.message}"
+    github.create_contents(
+      repo,
+      filename,
+      "Create #{filename}",
+      contents,
       branch: 'master'
     )
   end
 
   private
 
+  def repo
+    @repo ||= 'mysociety/kuvakazim'
+  end
+
+  def filename
+    @filename ||= 'datasources.json'
+  end
+
   def github
     @github ||= Octokit::Client.new(access_token: GITHUB_ACCESS_TOKEN)
   end
 
+  def contents
+    @contents ||= JSON.pretty_generate(
+      assembly: {
+        popolo: datasource_url(assembly)
+      },
+      senate: {
+        popolo: datasource_url(senate)
+      }
+    )
+  end
+
   def datasource_url(house)
     "https://cdn.rawgit.com/everypolitician/everypolitician-data/#{house[:sha]}/" \
-      "#{house[:popolo]}\n"
+      "#{house[:popolo]}"
   end
 
   def assembly
