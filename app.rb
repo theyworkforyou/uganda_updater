@@ -45,11 +45,11 @@ class KuvakazimUpdater
   private
 
   def repo
-    @repo ||= 'mysociety/kuvakazim'
+    @repo ||= 'theyworkforyou/uganda-parliament-watch'
   end
 
   def filename
-    @filename ||= 'datasources.json'
+    @filename ||= 'EVERYPOLITICIAN_DATASOURCE'
   end
 
   def github
@@ -57,14 +57,7 @@ class KuvakazimUpdater
   end
 
   def contents
-    @contents ||= JSON.pretty_generate(
-      assembly: {
-        popolo: datasource_url(assembly)
-      },
-      senate: {
-        popolo: datasource_url(senate)
-      }
-    )
+    @contents ||= datasource_url(legislature)
   end
 
   def datasource_url(house)
@@ -72,16 +65,12 @@ class KuvakazimUpdater
       "#{house[:popolo]}"
   end
 
-  def assembly
-    @assembly ||= zimbabwe[:legislatures].find { |l| l[:slug] == 'Assembly' }
+  def legislature
+    @legislature ||= country[:legislatures].find { |l| l[:slug] == ENV['LEGISLATURE_SLUG'] }
   end
 
-  def senate
-    @senate ||= zimbabwe[:legislatures].find { |l| l[:slug] == 'Senate' }
-  end
-
-  def zimbabwe
-    @zimbabwe ||= countries.find { |c| c[:slug] == 'Zimbabwe' }
+  def country
+    @country ||= countries.find { |c| c[:slug] == ENV['COUNTRY_SLUG'] }
   end
 
   def countries
